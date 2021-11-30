@@ -70,6 +70,13 @@ type
     procedure EMUndo(var Message: TMessage); message EM_UNDO;
     procedure EMGetFirstVisibleLine(var Message: TMessage); message EM_GETFIRSTVISIBLELINE;
     procedure EMCharFromPos(var Message: TMessage); message EM_CHARFROMPOS;
+
+    function GetCaretPos: TPoint; virtual;
+    procedure SetCaretPos(const Value: TPoint); virtual;
+  public
+    constructor Create(AOwner: TComponent); override;
+
+    property CaretPos: TPoint read GetCaretPos write SetCaretPos;
   end;
 
 implementation
@@ -209,6 +216,13 @@ begin
     Message.Result := 0;
 end;
 
+constructor TSynMemo.Create(AOwner: TComponent);
+begin
+  inherited;
+  Gutter.Visible := False;
+  RightEdge := 0;
+end;
+
 //(WPARAM) wParam,    // not used; must be zero
 //(LPARAM) lParam     // not used; must be zero
 procedure TSynMemo.EMCanUndo(var Message: TMessage);
@@ -222,6 +236,21 @@ procedure TSynMemo.EMUndo(var Message: TMessage);
 begin
   Message.Result := Integer(CanUndo);
   Undo;
+end;
+
+function TSynMemo.GetCaretPos: TPoint;
+begin
+  Result.X := CaretX;
+  Result.Y := CaretY;
+end;
+
+procedure TSynMemo.SetCaretPos(const Value: TPoint);
+var
+  XY : TBufferCoord;
+begin
+  XY.Line := Value.Y;
+  XY.Char := Value.X;
+  SetCaretXY(XY);
 end;
 
 //(WPARAM) wParam,          // not used; must be zero
